@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KETTYSCENT | Luxury Fragrance House</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              luxe: "0 22px 80px rgba(201, 168, 106, 0.18)"
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="fixed bottom-6 right-6 z-50 translate-y-3 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-black opacity-0 transition" id="toast"></div>
+
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-black/45 backdrop-blur">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <a href="/" class="brand-display text-2xl font-semibold uppercase tracking-[0.35em] text-gold">KETTYSCENT</a>
+        <div class="hidden items-center gap-8 text-sm text-white/75 md:flex">
+          <a href="#featured" class="transition hover:text-gold">Featured</a>
+          <a href="#collections" class="transition hover:text-gold">Collections</a>
+          <a href="#catalog" class="transition hover:text-gold">Shop</a>
+        </div>
+        <a href="/checkout.html" class="rounded-full border border-[var(--luxury-gold)] px-4 py-2 text-sm text-white transition hover:bg-[rgba(201,168,106,0.12)]">
+          Cart <span data-cart-count>0</span>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="relative overflow-hidden">
+        <div class="absolute inset-0">
+          <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=1600&q=80" alt="Luxury perfume hero" class="h-full w-full object-cover" />
+          <div class="hero-overlay absolute inset-0"></div>
+        </div>
+        <div class="relative mx-auto grid min-h-[78vh] max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.2fr_0.8fr]">
+          <div class="max-w-3xl page-fade">
+            <span class="inline-flex rounded-full border border-[var(--luxury-gold)] px-4 py-2 text-xs uppercase tracking-[0.35em] text-gold">Fine fragrance collection</span>
+            <h1 class="mt-6 text-5xl font-semibold leading-tight text-white md:text-7xl">Signature perfumes shaped by mood, memory, and luxury.</h1>
+            <p class="mt-6 max-w-2xl text-lg leading-8 text-white/78 md:text-xl">Discover elegant scent profiles crafted for bold entrances, intimate evenings, and unforgettable daily rituals.</p>
+            <div class="mt-10 flex flex-col gap-4 sm:flex-row">
+              <a href="#catalog" class="rounded-full bg-gold px-8 py-4 text-center text-sm font-semibold uppercase tracking-[0.3em] text-black transition hover:brightness-110">Shop Now</a>
+              <a href="#featured" class="rounded-full border border-white/20 px-8 py-4 text-center text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Explore Featured</a>
+            </div>
+          </div>
+          <div class="grid gap-6 page-fade">
+            <div class="glass-panel rounded-[1.75rem] p-6 shadow-luxe">
+              <p class="text-sm uppercase tracking-[0.3em] text-gold">Curated Scent Notes</p>
+              <div class="mt-6 grid grid-cols-2 gap-4">
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p class="text-sm text-white/55">Amber</p>
+                  <p class="mt-2 text-lg font-medium text-white">Warm & magnetic</p>
+                </div>
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p class="text-sm text-white/55">Rose</p>
+                  <p class="mt-2 text-lg font-medium text-white">Velvet floral</p>
+                </div>
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p class="text-sm text-white/55">Vetiver</p>
+                  <p class="mt-2 text-lg font-medium text-white">Dry & refined</p>
+                </div>
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p class="text-sm text-white/55">Sandalwood</p>
+                  <p class="mt-2 text-lg font-medium text-white">Creamy finish</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="featured" class="mx-auto max-w-7xl px-6 py-20">
+        <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-sm uppercase tracking-[0.35em] text-gold">Featured perfumes</p>
+            <h2 class="mt-3 text-3xl font-semibold text-white md:text-4xl">The best of the house collection</h2>
+          </div>
+          <p class="max-w-2xl text-white/65">Statement fragrances selected for their depth, longevity, and polished signature presence.</p>
+        </div>
+        <div id="featured-products" class="grid gap-8 md:grid-cols-2 xl:grid-cols-3"></div>
+      </section>
+
+      <section id="collections" class="mx-auto max-w-7xl px-6 py-8">
+        <div class="mb-10">
+          <p class="text-sm uppercase tracking-[0.35em] text-gold">Collections</p>
+          <h2 class="mt-3 text-3xl font-semibold text-white md:text-4xl">Find your fragrance identity</h2>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          <div class="category-card glass-panel gold-border rounded-[1.75rem] p-8">
+            <p class="text-sm uppercase tracking-[0.35em] text-gold">Men</p>
+            <h3 class="mt-4 text-2xl font-semibold text-white">Bold woods & spice</h3>
+            <p class="mt-3 text-white/70">Structured profiles with vetiver, leather, and crisp citruses.</p>
+          </div>
+          <div class="category-card glass-panel gold-border rounded-[1.75rem] p-8">
+            <p class="text-sm uppercase tracking-[0.35em] text-gold">Women</p>
+            <h3 class="mt-4 text-2xl font-semibold text-white">Florals with depth</h3>
+            <p class="mt-3 text-white/70">Elegant bouquets balanced with musk, iris, and amber warmth.</p>
+          </div>
+          <div class="category-card glass-panel gold-border rounded-[1.75rem] p-8">
+            <p class="text-sm uppercase tracking-[0.35em] text-gold">Unisex</p>
+            <h3 class="mt-4 text-2xl font-semibold text-white">Modern shared scents</h3>
+            <p class="mt-3 text-white/70">Versatile compositions that feel refined on every skin story.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="catalog" class="mx-auto max-w-7xl px-6 py-20">
+        <div class="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-sm uppercase tracking-[0.35em] text-gold">Shop all</p>
+            <h2 class="mt-3 text-3xl font-semibold text-white md:text-4xl">Luxury perfumes for every occasion</h2>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button data-category-filter="All" class="rounded-full bg-gold px-5 py-3 text-sm font-semibold text-black">All</button>
+            <button data-category-filter="Men" class="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Men</button>
+            <button data-category-filter="Women" class="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Women</button>
+            <button data-category-filter="Unisex" class="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Unisex</button>
+          </div>
+        </div>
+        <div id="catalog-products" class="grid gap-8 md:grid-cols-2 xl:grid-cols-3"></div>
+      </section>
+
+      <section class="mx-auto max-w-7xl px-6 pb-20">
+        <div class="glass-panel gold-border rounded-[2rem] p-8 md:p-10">
+          <p class="brand-display text-sm uppercase tracking-[0.35em] text-gold">Contact KETTYSCENT</p>
+          <h2 class="mt-4 text-3xl font-semibold text-white md:text-4xl">Order fast through WhatsApp, email, or direct call</h2>
+          <div class="mt-8 grid gap-4 md:grid-cols-3">
+            <a href="https://wa.me/2348134069319?text=HI%20KETTY%20SCENT" target="_blank" rel="noreferrer" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 transition hover:border-[var(--luxury-gold)] hover:text-gold">
+              <p class="text-sm uppercase tracking-[0.25em] text-white/55">WhatsApp</p>
+              <p class="mt-3 text-lg font-semibold text-white">08134069319</p>
+            </a>
+            <a href="mailto:kettyscent@gmail.com" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 transition hover:border-[var(--luxury-gold)] hover:text-gold">
+              <p class="text-sm uppercase tracking-[0.25em] text-white/55">Gmail</p>
+              <p class="mt-3 text-lg font-semibold text-white break-all">kettyscent@gmail.com</p>
+            </a>
+            <a href="tel:08134069319" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 transition hover:border-[var(--luxury-gold)] hover:text-gold">
+              <p class="text-sm uppercase tracking-[0.25em] text-white/55">Calls</p>
+              <p class="mt-3 text-lg font-semibold text-white">08134069319</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-white/10 bg-black/40">
+      <div class="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
+        <p>KETTYSCENT. Designed for elegant fragrance retail.</p>
+        <div class="flex flex-wrap gap-6">
+          <a href="/" class="transition hover:text-gold">Home</a>
+          <a href="/checkout.html" class="transition hover:text-gold">Checkout</a>
+          <a href="https://wa.me/2348134069319?text=HI%20KETTY%20SCENT" target="_blank" rel="noreferrer" class="transition hover:text-gold">WhatsApp</a>
+          <a href="mailto:kettyscent@gmail.com" class="transition hover:text-gold">Gmail</a>
+          <a href="tel:08134069319" class="transition hover:text-gold">Call</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfume Details | KETTYSCENT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="fixed bottom-6 right-6 z-50 translate-y-3 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-black opacity-0 transition" id="toast"></div>
+
+    <header class="border-b border-white/10 bg-black/45 backdrop-blur">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <a href="/" class="text-xl font-semibold uppercase tracking-[0.35em] text-gold">KETTYSCENT</a>
+        <div class="flex items-center gap-4">
+          <a href="https://wa.me/2348134069319?text=HI%20KETTY%20SCENT" target="_blank" rel="noreferrer" class="hidden text-sm text-white/75 transition hover:text-gold md:block">WhatsApp</a>
+          <a href="/" class="text-sm text-white/75 transition hover:text-gold">Home</a>
+          <a href="/checkout.html" class="rounded-full border border-[var(--luxury-gold)] px-4 py-2 text-sm text-white">Cart <span data-cart-count>0</span></a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 py-16">
+      <div id="product-detail" class="glass-panel gold-border rounded-[2rem] p-6 md:p-10"></div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KETTYSCENT Admin Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Cinzel", "serif"],
+              body: ["Manrope", "sans-serif"]
+            },
+            colors: {
+              gold: "#ca9f5a"
+            },
+            boxShadow: {
+              luxe: "0 26px 80px rgba(0,0,0,0.45)"
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Manrope:wght@500;600;700;800&display=swap");
+
+      body {
+        background:
+          radial-gradient(circle at 8% 0%, rgba(202, 159, 90, 0.2), transparent 28%),
+          radial-gradient(circle at 92% 0%, rgba(202, 159, 90, 0.16), transparent 30%),
+          linear-gradient(165deg, #07090d 0%, #0f131a 52%, #151921 100%);
+      }
+
+      .panel {
+        background: rgba(17, 21, 28, 0.86);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .muted {
+        color: rgba(226, 232, 240, 0.78);
+      }
+
+      .table-head {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    </style>
+  </head>
+  <body id="admin-page" class="min-h-screen font-body text-white">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-black/45 backdrop-blur-xl">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <a href="/" class="font-display text-xl font-black tracking-[0.2em] text-gold">KETTYSCENT ADMIN</a>
+        <div class="flex items-center gap-3">
+          <a href="/" class="rounded-full border border-white/20 px-4 py-2 text-sm font-bold text-white transition hover:border-gold hover:text-gold">Storefront</a>
+          <button id="admin-logout" class="rounded-full bg-gold px-4 py-2 text-sm font-black text-black transition hover:brightness-110">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 py-10">
+      <section id="admin-login-view" class="panel mx-auto max-w-lg rounded-[2rem] p-8 shadow-luxe">
+        <p class="text-sm font-black uppercase tracking-[0.3em] text-gold">Private Admin Access</p>
+        <h1 class="font-display mt-3 text-4xl font-black text-white">Premium Control Room</h1>
+        <p class="muted mt-4 text-base font-semibold">Sign in to manage products, orders, payment settings, and sales analytics.</p>
+        <form id="admin-login-form" class="mt-8 space-y-4">
+          <input class="w-full rounded-2xl border border-white/20 bg-black/25 px-4 py-3 text-white outline-none transition focus:border-gold" id="email" name="email" type="email" placeholder="admin@kettyscent.com" required />
+          <input class="w-full rounded-2xl border border-white/20 bg-black/25 px-4 py-3 text-white outline-none transition focus:border-gold" id="password" name="password" type="password" placeholder="Enter password" required />
+          <button class="w-full rounded-2xl bg-gold px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110" type="submit">Sign In</button>
+        </form>
+      </section>
+
+      <section id="admin-dashboard-view" class="hidden space-y-8">
+        <div class="flex flex-col gap-2">
+          <p class="text-sm font-black uppercase tracking-[0.3em] text-gold">Operations Dashboard</p>
+          <h1 class="font-display text-4xl font-black text-white">Business Intelligence Suite</h1>
+        </div>
+
+        <section id="new-order-alert-shell" class="hidden rounded-3xl border border-gold/60 bg-gold/10 p-5 shadow-luxe">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.25em] text-gold">New Order Alert</p>
+              <h2 id="new-order-alert-title" class="mt-1 text-2xl font-black text-white">New order received</h2>
+              <p id="new-order-alert-body" class="muted mt-1 font-semibold"></p>
+            </div>
+            <div class="flex gap-3">
+              <button id="dismiss-new-order-alert" class="rounded-full border border-white/20 px-4 py-2 text-sm font-bold text-white transition hover:border-gold hover:text-gold">Dismiss</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Total Products</p>
+            <p id="metric-products" class="mt-3 text-3xl font-black text-white">0</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Total Orders</p>
+            <p id="metric-orders" class="mt-3 text-3xl font-black text-white">0</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Pending Orders</p>
+            <p id="metric-pending" class="mt-3 text-3xl font-black text-amber-300">0</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Delivered Orders</p>
+            <p id="metric-delivered" class="mt-3 text-3xl font-black text-emerald-300">0</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe sm:col-span-2">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Total Revenue</p>
+            <p id="metric-revenue" class="mt-3 text-3xl font-black text-gold">N0.00</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Monthly Revenue</p>
+            <p id="metric-monthly" class="mt-3 text-2xl font-black text-white">N0.00</p>
+          </article>
+          <article class="panel rounded-2xl p-5 shadow-luxe">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Today</p>
+            <p id="metric-today-revenue" class="mt-3 text-xl font-black text-white">N0.00</p>
+            <p id="metric-today-orders" class="muted mt-1 text-sm font-bold">0 orders</p>
+          </article>
+        </section>
+
+        <section class="panel rounded-3xl p-6 shadow-luxe">
+          <div class="mb-4">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Top Sellers</p>
+            <h2 class="font-display mt-1 text-2xl font-black text-white">Best-Performing Perfumes</h2>
+          </div>
+          <ul id="top-products-list" class="space-y-3"></ul>
+        </section>
+
+        <section class="panel rounded-3xl p-6 shadow-luxe">
+          <div class="mb-4">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Payment Settings</p>
+            <h2 class="font-display mt-1 text-2xl font-black text-white">Bank Transfer Details</h2>
+          </div>
+          <form id="payment-settings-form" class="grid gap-3 md:grid-cols-2">
+            <input id="ps-business-name" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Business name" />
+            <input id="ps-bank-name" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Bank name" />
+            <input id="ps-account-name" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Account name" />
+            <input id="ps-account-number" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Account number" />
+            <textarea id="ps-instructions" class="min-h-20 w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold md:col-span-2" placeholder="Payment instructions"></textarea>
+            <div class="rounded-xl border border-white/20 bg-black/25 px-4 py-3 text-sm font-semibold text-slate-300 md:col-span-2">
+              Checkout payment method is fixed to <span class="font-black text-gold">Bank Transfer</span>.
+            </div>
+            <button class="rounded-xl bg-gold px-4 py-3 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110 md:col-span-2" type="submit">Save Payment Settings</button>
+          </form>
+        </section>
+
+        <div class="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+          <section class="panel rounded-3xl p-6 shadow-luxe">
+            <div class="mb-4">
+              <p class="muted text-xs font-black uppercase tracking-[0.2em]">Product Management</p>
+              <h2 id="product-form-title" class="font-display mt-1 text-2xl font-black text-white">Add Perfume</h2>
+            </div>
+            <form id="product-form" class="space-y-3">
+              <input name="productId" type="hidden" />
+              <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="name" name="name" type="text" placeholder="Perfume name" required />
+              <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="price" name="price" type="number" min="0" step="0.01" placeholder="Price" required />
+              <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="imageUrl" name="imageUrl" type="url" placeholder="Image URL" required />
+              <textarea class="min-h-24 w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="description" name="description" placeholder="Description" required></textarea>
+              <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
+                <select class="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="category" name="category">
+                  <option>Men</option>
+                  <option>Women</option>
+                  <option selected>Unisex</option>
+                </select>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-bold text-white">
+                  <input name="featured" type="checkbox" />
+                  Featured
+                </label>
+              </div>
+              <button id="product-submit" class="w-full rounded-xl bg-gold px-4 py-3 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110" type="submit">Add Product</button>
+            </form>
+          </section>
+
+          <section class="panel rounded-3xl p-6 shadow-luxe">
+            <div class="mb-4">
+              <p class="muted text-xs font-black uppercase tracking-[0.2em]">Inventory</p>
+              <h2 class="font-display mt-1 text-2xl font-black text-white">Existing Perfumes</h2>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-white/10">
+              <table class="min-w-full text-left text-sm">
+                <thead class="table-head text-slate-300">
+                  <tr>
+                    <th class="px-4 py-3 font-black">Product</th>
+                    <th class="px-4 py-3 font-black">Price</th>
+                    <th class="px-4 py-3 font-black">Type</th>
+                    <th class="px-4 py-3 font-black">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-products-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel rounded-3xl p-6 shadow-luxe">
+          <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p class="muted text-xs font-black uppercase tracking-[0.2em]">Order Management</p>
+              <h2 class="font-display mt-1 text-2xl font-black text-white">Customer Orders</h2>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <input id="order-search-input" type="search" placeholder="Search order ID" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold sm:w-64" />
+              <button id="order-search-reset" class="rounded-xl border border-white/20 px-4 py-2 text-sm font-black text-white transition hover:border-gold hover:text-gold">Reset</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-white/10">
+            <table class="min-w-full text-left text-sm">
+              <thead class="table-head text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 font-black">Order ID</th>
+                  <th class="px-4 py-3 font-black">Customer</th>
+                  <th class="px-4 py-3 font-black">Address</th>
+                  <th class="px-4 py-3 font-black">Items</th>
+                  <th class="px-4 py-3 font-black">Total</th>
+                  <th class="px-4 py-3 font-black">Status</th>
+                  <th class="px-4 py-3 font-black">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>
