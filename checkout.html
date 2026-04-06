@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout | KETTYSCENT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="fixed bottom-6 right-6 z-50 translate-y-3 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-black opacity-0 transition" id="toast"></div>
+
+    <header class="border-b border-white/10 bg-black/45 backdrop-blur">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <a href="/" class="text-xl font-semibold uppercase tracking-[0.35em] text-gold">KETTYSCENT</a>
+        <div class="flex items-center gap-4">
+          <a href="mailto:kettyscent@gmail.com" class="hidden text-sm text-white/75 transition hover:text-gold md:block">Gmail</a>
+          <a href="/" class="text-sm text-white/75 transition hover:text-gold">Continue Shopping</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 py-16">
+      <div class="mb-12 max-w-3xl">
+        <p class="text-sm uppercase tracking-[0.35em] text-gold">Checkout</p>
+        <h1 class="mt-4 text-4xl font-semibold text-white">Complete your fragrance order</h1>
+        <p class="mt-4 text-white/70">Review your cart, confirm your delivery details, and place your order in one smooth step.</p>
+      </div>
+
+      <div class="grid gap-10 lg:grid-cols-[1fr_0.8fr]">
+        <section class="glass-panel gold-border rounded-[2rem] p-6 md:p-8">
+          <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-2xl font-semibold text-white">Your Cart</h2>
+            <p id="order-summary-count" class="text-sm uppercase tracking-[0.25em] text-gold">0 item(s)</p>
+          </div>
+          <div id="cart-items" class="space-y-4"></div>
+        </section>
+
+        <section class="glass-panel gold-border rounded-[2rem] p-6 md:p-8">
+          <h2 class="text-2xl font-semibold text-white">Delivery Details</h2>
+          <form id="checkout-form" class="mt-6 space-y-5">
+            <div>
+              <label class="mb-2 block text-sm text-white/70" for="customerName">Full Name</label>
+              <input class="form-input" id="customerName" name="customerName" type="text" placeholder="Enter full name" required />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm text-white/70" for="phone">Phone</label>
+              <input class="form-input" id="phone" name="phone" type="tel" placeholder="Enter phone number" required />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm text-white/70" for="address">Address</label>
+              <textarea class="form-textarea min-h-36" id="address" name="address" placeholder="Enter delivery address" required></textarea>
+            </div>
+            <div class="rounded-[1.25rem] border border-white/10 bg-black/20 p-5">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row">
+                <input id="promo-code-input" class="form-input" type="text" placeholder="Promo code (e.g. WELCOME10)" />
+                <button id="apply-promo-btn" type="button" class="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Apply</button>
+              </div>
+              <p id="promo-feedback" class="mb-4 text-sm text-white/65"></p>
+              <div id="promo-summary" class="mb-3 hidden items-center justify-between text-sm text-white/75">
+                <p>Discount</p>
+                <p id="promo-discount-amount">- ₦0.00</p>
+              </div>
+              <div class="mb-3 flex items-center justify-between text-sm text-white/75">
+                <p>Delivery</p>
+                <p id="delivery-fee-amount">₦0.00</p>
+              </div>
+              <p id="delivery-rule-note" class="mb-3 text-xs text-white/60"></p>
+              <div class="flex items-center justify-between">
+                <p class="text-sm uppercase tracking-[0.25em] text-white/55">Total</p>
+                <p id="cart-total" class="text-2xl font-semibold text-gold">₦0.00</p>
+              </div>
+            </div>
+            <button class="w-full rounded-full bg-gold px-6 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-black transition hover:brightness-110" type="submit">
+              Place Order
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
