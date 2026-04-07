@@ -40,4 +40,29 @@ async function login(req, res) {
   }
 }
 
-module.exports = { login };
+async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword || String(newPassword).length < 6) {
+      return res.status(400).json({ message: "Current password and strong new password are required." });
+    }
+
+    const admin = await User.findByPk(req.admin?.adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin account not found." });
+    }
+
+    const matches = await bcrypt.compare(currentPassword, admin.password);
+    if (!matches) {
+      return res.status(401).json({ message: "Current password is incorrect." });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await admin.update({ password: hashed });
+    return res.json({ message: "Password updated successfully." });
+  } catch (_error) {
+    return res.status(500).json({ message: "Failed to change password." });
+  }
+}
+
+module.exports = { login, changePassword };

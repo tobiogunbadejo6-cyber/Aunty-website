@@ -43,7 +43,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.get("*", (req, res) => {
-  const allowedPages = ["/", "/index.html", "/product.html", "/checkout.html", "/payment.html", "/confirmation.html"];
+  const allowedPages = ["/", "/index.html", "/product.html", "/checkout.html", "/payment.html", "/confirmation.html", "/track.html"];
   if (allowedPages.includes(req.path)) {
     const fileName = req.path === "/" ? "index.html" : req.path.slice(1);
     return res.sendFile(path.join(__dirname, "public", fileName));

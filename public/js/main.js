@@ -25,6 +25,7 @@ function calculateCheckoutTotals(subtotal, discountAmount = 0) {
 }
 
 function productCard(product) {
+  const outOfStock = Number(product.stock || 0) <= 0;
   return `
     <article class="product-card glass-panel gold-border overflow-hidden rounded-[1.5rem] page-fade">
       <div class="relative aspect-[4/5] overflow-hidden bg-black/25 md:h-72 md:aspect-auto">
@@ -36,12 +37,13 @@ function productCard(product) {
           <div>
             <h3 class="text-xl font-semibold text-white">${product.name}</h3>
             <p class="mt-2 line-clamp-2 text-sm text-white/70">${product.description}</p>
+            <p class="mt-2 text-xs uppercase tracking-[0.2em] ${outOfStock ? "text-red-300" : "text-emerald-300"}">${outOfStock ? "Out of stock" : `In stock: ${product.stock}`}</p>
           </div>
           <span class="whitespace-nowrap text-lg font-semibold text-gold">${currency(product.price)}</span>
         </div>
         <div class="flex gap-3">
           <a href="/product.html?id=${product._id}" class="flex-1 rounded-full border border-white/15 px-4 py-3 text-center text-sm font-medium text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">View Details</a>
-          <button data-add-to-cart="${product._id}" class="flex-1 rounded-full bg-gold px-4 py-3 text-sm font-semibold text-black transition hover:brightness-110">Add to Cart</button>
+          <button data-add-to-cart="${product._id}" ${outOfStock ? "disabled" : ""} class="flex-1 rounded-full px-4 py-3 text-sm font-semibold transition ${outOfStock ? "cursor-not-allowed bg-white/20 text-white/60" : "bg-gold text-black hover:brightness-110"}">Add to Cart</button>
         </div>
       </div>
     </article>
@@ -61,6 +63,10 @@ function bindAddToCart(products) {
     button.addEventListener("click", () => {
       const product = products.find((entry) => entry._id === button.dataset.addToCart);
       if (!product) {
+        return;
+      }
+      if (Number(product.stock || 0) <= 0) {
+        showToast("This perfume is out of stock.");
         return;
       }
 
@@ -136,6 +142,9 @@ async function loadProductPage() {
           <div>
             <h1 class="text-4xl font-semibold text-white md:text-5xl">${product.name}</h1>
             <p class="mt-4 text-lg leading-8 text-white/78">${product.description}</p>
+            <p class="mt-3 text-sm uppercase tracking-[0.2em] ${Number(product.stock || 0) > 0 ? "text-emerald-300" : "text-red-300"}">
+              ${Number(product.stock || 0) > 0 ? `In stock: ${product.stock}` : "Out of stock"}
+            </p>
           </div>
           <div class="text-3xl font-semibold text-gold">${currency(product.price)}</div>
           <div class="flex flex-col gap-4 sm:flex-row">
@@ -144,7 +153,7 @@ async function loadProductPage() {
               <input id="qty-input" type="number" min="1" value="1" class="w-16 bg-transparent text-center text-white focus:outline-none" />
               <button id="qty-plus" class="px-5 py-4 text-xl text-white/75">+</button>
             </div>
-            <button id="product-add-to-cart" class="rounded-full bg-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-black transition hover:brightness-110">Add to Cart</button>
+            <button id="product-add-to-cart" ${Number(product.stock || 0) <= 0 ? "disabled" : ""} class="rounded-full px-8 py-4 text-sm font-semibold uppercase tracking-[0.3em] transition ${Number(product.stock || 0) <= 0 ? "cursor-not-allowed bg-white/20 text-white/60" : "bg-gold text-black hover:brightness-110"}">Add to Cart</button>
             <a href="/checkout.html" class="rounded-full border border-white/15 px-8 py-4 text-center text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Checkout</a>
           </div>
         </div>
@@ -179,6 +188,10 @@ async function loadProductPage() {
       qtyInput.value = Math.max(1, Number(qtyInput.value) + 1);
     });
     document.getElementById("product-add-to-cart").addEventListener("click", () => {
+      if (Number(product.stock || 0) <= 0) {
+        showToast("This perfume is out of stock.");
+        return;
+      }
       Store.addToCart(product, Math.max(1, Number(qtyInput.value) || 1));
       showToast(`${product.name} added to cart.`);
     });
@@ -277,12 +290,14 @@ async function loadCheckoutPage() {
     return;
   }
 
+  let deliveryZones = [];
   try {
     const settings = await API.request("/payments/settings");
     paymentRules = {
       freeDeliveryThreshold: Number(settings.freeDeliveryThreshold || 50000),
       deliveryFee: Number(settings.deliveryFee || 2500)
     };
+    deliveryZones = Array.isArray(settings.deliveryZones) ? settings.deliveryZones : [];
   } catch (_error) {
     // Fallback to defaults if settings API fails.
   }
@@ -298,11 +313,38 @@ async function loadCheckoutPage() {
   const totalNode = document.getElementById("cart-total");
   const deliveryNode = document.getElementById("delivery-fee-amount");
   const deliveryRuleNote = document.getElementById("delivery-rule-note");
+  const deliveryZoneSelect = document.getElementById("deliveryZone");
+  const zoneFeeMap = new Map(deliveryZones.map((zone) => [String(zone.name || "").toLowerCase(), Number(zone.fee || 0)]));
+
+  const getZoneShippingFee = (discountedSubtotal) => {
+    if (discountedSubtotal >= paymentRules.freeDeliveryThreshold) {
+      return 0;
+    }
+    const selectedZone = String(deliveryZoneSelect?.value || "").toLowerCase();
+    if (selectedZone && zoneFeeMap.has(selectedZone)) {
+      return Math.max(0, Number(zoneFeeMap.get(selectedZone)));
+    }
+    return Math.max(0, Number(paymentRules.deliveryFee || 0));
+  };
+
+  if (deliveryZoneSelect && deliveryZones.length) {
+    deliveryZones.forEach((zone) => {
+      if (!zone?.name) {
+        return;
+      }
+      const option = document.createElement("option");
+      option.value = zone.name;
+      option.textContent = `${zone.name} (${currency(Number(zone.fee || 0))})`;
+      deliveryZoneSelect.appendChild(option);
+    });
+  }
 
   const updateCheckoutTotals = () => {
     const subtotal = Store.getTotal();
     const discountAmount = appliedPromo?.discountAmount || 0;
-    const { shippingFee, finalTotal } = calculateCheckoutTotals(subtotal, discountAmount);
+    const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+    const shippingFee = getZoneShippingFee(discountedSubtotal);
+    const finalTotal = discountedSubtotal + shippingFee;
     totalNode.textContent = currency(finalTotal);
     deliveryNode.textContent = shippingFee === 0 ? "FREE" : currency(shippingFee);
     deliveryRuleNote.textContent = `Free delivery for orders from ${currency(paymentRules.freeDeliveryThreshold)} and above.`;
@@ -311,6 +353,7 @@ async function loadCheckoutPage() {
   };
 
   document.addEventListener("cart:updated", updateCheckoutTotals);
+  deliveryZoneSelect?.addEventListener("change", updateCheckoutTotals);
 
   applyPromoBtn?.addEventListener("click", async () => {
     const code = promoCodeInput.value.trim();
@@ -354,9 +397,10 @@ async function loadCheckoutPage() {
       customerName: formData.get("customerName"),
       phone: formData.get("phone"),
       address: formData.get("address"),
+      deliveryZone: formData.get("deliveryZone") || null,
       promoCode: appliedPromo?.code || null,
       promoDiscountAmount: appliedPromo?.discountAmount || 0,
-      shippingFeePreview: calculateCheckoutTotals(Store.getTotal(), appliedPromo?.discountAmount || 0).shippingFee,
+      shippingFeePreview: getZoneShippingFee(Math.max(0, Store.getTotal() - (appliedPromo?.discountAmount || 0))),
       items: cart.map((item) => ({
         productId: item.productId,
         quantity: item.quantity
@@ -391,7 +435,13 @@ async function loadPaymentPage() {
     const cart = Store.getCart();
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const promoDiscount = Number(draft.promoDiscountAmount || 0);
-    const { discountedSubtotal, shippingFee, finalTotal } = calculateCheckoutTotals(subtotal, promoDiscount);
+    const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+    const zones = Array.isArray(paymentSettings.deliveryZones) ? paymentSettings.deliveryZones : [];
+    const zone = zones.find((entry) => String(entry.name || "").toLowerCase() === String(draft.deliveryZone || "").toLowerCase());
+    const shippingFee = discountedSubtotal >= paymentRules.freeDeliveryThreshold
+      ? 0
+      : (zone ? Number(zone.fee || 0) : paymentRules.deliveryFee);
+    const finalTotal = discountedSubtotal + shippingFee;
 
     shell.innerHTML = `
       <div class="grid gap-8 lg:grid-cols-[1fr_0.9fr]">
@@ -401,9 +451,15 @@ async function loadPaymentPage() {
           <p class="mt-3 text-white/70">${paymentSettings.instructions || "Make a bank transfer and submit your payment reference."}</p>
           <div class="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5 text-white/80">
             <p><span class="text-white/55">Business:</span> ${paymentSettings.businessName || "KETTYSCENT"}</p>
-            <p class="mt-2"><span class="text-white/55">Bank:</span> ${paymentSettings.bankName || "-"}</p>
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p><span class="text-white/55">Bank:</span> <span id="payment-bank-name">${paymentSettings.bankName || "-"}</span></p>
+              <button id="copy-bank-btn" type="button" class="rounded-full border border-white/20 px-3 py-1 text-xs text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Copy Bank</button>
+            </div>
             <p class="mt-2"><span class="text-white/55">Account Name:</span> ${paymentSettings.accountName || "-"}</p>
-            <p class="mt-2"><span class="text-white/55">Account Number:</span> ${paymentSettings.accountNumber || "-"}</p>
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p><span class="text-white/55">Account Number:</span> <span id="payment-account-number">${paymentSettings.accountNumber || "-"}</span></p>
+              <button id="copy-account-btn" type="button" class="rounded-full border border-white/20 px-3 py-1 text-xs text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Copy Number</button>
+            </div>
             <p class="mt-2"><span class="text-white/55">Delivery Rule:</span> Free from ${currency(paymentRules.freeDeliveryThreshold)}.</p>
           </div>
           <form id="payment-form" class="mt-6 space-y-4">
@@ -426,11 +482,31 @@ async function loadPaymentPage() {
             ${draft.promoCode ? `<div class="mt-2 flex items-center justify-between text-green-300"><span>Promo</span><span>${draft.promoCode}</span></div>` : ""}
             ${draft.promoCode ? `<div class="mt-2 flex items-center justify-between text-green-300"><span>Discount</span><span>- ${currency(promoDiscount)}</span></div>` : ""}
             <div class="mt-2 flex items-center justify-between text-white/70"><span>Delivery</span><span>${shippingFee === 0 ? "FREE" : currency(shippingFee)}</span></div>
+            ${draft.deliveryZone ? `<div class="mt-2 flex items-center justify-between text-white/70"><span>Zone</span><span>${draft.deliveryZone}</span></div>` : ""}
             <div class="mt-4 flex items-center justify-between text-xl font-semibold text-gold"><span>Total</span><span>${currency(finalTotal)}</span></div>
           </div>
         </section>
       </div>
     `;
+
+    const copyText = async (value, label) => {
+      try {
+        await navigator.clipboard.writeText(String(value || ""));
+        showToast(`${label} copied.`);
+      } catch (_error) {
+        showToast(`Failed to copy ${label.toLowerCase()}.`);
+      }
+    };
+
+    document.getElementById("copy-bank-btn")?.addEventListener("click", async () => {
+      const bankName = document.getElementById("payment-bank-name")?.textContent?.trim();
+      await copyText(bankName, "Bank name");
+    });
+
+    document.getElementById("copy-account-btn")?.addEventListener("click", async () => {
+      const accountNumber = document.getElementById("payment-account-number")?.textContent?.trim();
+      await copyText(accountNumber, "Account number");
+    });
 
     document.getElementById("payment-form").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -481,6 +557,10 @@ function loadConfirmationPage() {
           <p class="mt-2 font-medium">${order._id}</p>
         </div>
         <div>
+          <p class="text-xs uppercase tracking-[0.25em] text-white/50">Tracking ID</p>
+          <p class="mt-2 font-medium">${order.trackingId || "-"}</p>
+        </div>
+        <div>
           <p class="text-xs uppercase tracking-[0.25em] text-white/50">Status</p>
           <p class="mt-2 font-medium text-gold">${order.status}</p>
         </div>
@@ -491,10 +571,46 @@ function loadConfirmationPage() {
       </div>
       ${order.promoCode ? `<p class="mt-4 text-sm text-white/70">Promo code used: <span class="text-gold">${order.promoCode}</span> (saved ${currency(order.discountAmount || 0)})</p>` : ""}
       <p class="mt-2 text-sm text-white/70">Delivery fee: <span class="text-gold">${order.shippingFee === 0 ? "FREE" : currency(order.shippingFee || 0)}</span></p>
+      ${order.deliveryZone ? `<p class="mt-2 text-sm text-white/70">Delivery zone: <span class="text-gold">${order.deliveryZone}</span></p>` : ""}
       <p class="mt-2 text-sm text-white/70">Payment: <span class="text-gold">${order.paymentStatus || "Pending"}</span> via ${order.paymentMethod || "BANK_TRANSFER"}</p>
-      <a href="/" class="mt-8 inline-flex rounded-full bg-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-black transition hover:brightness-110">Continue Shopping</a>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href="/track.html" class="inline-flex rounded-full border border-white/15 px-8 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">Track Order</a>
+        <a href="https://wa.me/2348134069319?text=${encodeURIComponent(`HI KETTY SCENT, I JUST PLACED ORDER ${order._id} (TRACKING: ${order.trackingId || "-"})`)}" target="_blank" rel="noreferrer" class="inline-flex rounded-full bg-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-black transition hover:brightness-110">Send WhatsApp Summary</a>
+        <a href="/" class="inline-flex rounded-full bg-gold px-8 py-4 text-sm font-semibold uppercase tracking-[0.3em] text-black transition hover:brightness-110">Continue Shopping</a>
+      </div>
     </div>
   `;
+}
+
+async function loadTrackPage() {
+  const form = document.getElementById("track-order-form");
+  const result = document.getElementById("track-result");
+  if (!form || !result) {
+    return;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const trackingId = document.getElementById("track-id").value.trim().toUpperCase();
+    const phone = document.getElementById("track-phone").value.trim();
+
+    try {
+      const order = await API.request(`/orders/track?trackingId=${encodeURIComponent(trackingId)}&phone=${encodeURIComponent(phone)}`);
+      result.innerHTML = `
+        <div class="rounded-[1.25rem] border border-white/10 bg-black/20 p-5 text-white/80">
+          <p class="text-sm uppercase tracking-[0.22em] text-gold">Tracking Result</p>
+          <p class="mt-3"><span class="text-white/60">Order ID:</span> ${order._id}</p>
+          <p class="mt-2"><span class="text-white/60">Tracking ID:</span> ${order.trackingId || "-"}</p>
+          <p class="mt-2"><span class="text-white/60">Status:</span> <span class="text-gold">${order.status}</span></p>
+          <p class="mt-2"><span class="text-white/60">Payment:</span> ${order.paymentStatus}</p>
+          <p class="mt-2"><span class="text-white/60">Total:</span> ${currency(order.totalAmount)}</p>
+          <p class="mt-2"><span class="text-white/60">Address:</span> ${order.address}</p>
+        </div>
+      `;
+    } catch (error) {
+      result.innerHTML = `<p class="mt-3 text-sm text-red-300">${error.message}</p>`;
+    }
+  });
 }
 
 function showToast(message) {
@@ -521,6 +637,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCheckoutPage();
     await loadPaymentPage();
     loadConfirmationPage();
+    await loadTrackPage();
   } catch (error) {
     showToast(error.message);
   }

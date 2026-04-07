@@ -78,6 +78,17 @@ module.exports = (sequelize) => sequelize.define(
       field: "payment_status",
       defaultValue: "Pending"
     },
+    trackingId: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      unique: true,
+      field: "tracking_id"
+    },
+    deliveryZone: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
+      field: "delivery_zone"
+    },
     status: {
       type: DataTypes.ENUM("Pending", "Delivered"),
       allowNull: false,

@@ -5,6 +5,14 @@ function computeDiscount(subtotal, promo) {
     return 0;
   }
 
+  if (promo.expiresAt && new Date(promo.expiresAt).getTime() < Date.now()) {
+    return 0;
+  }
+
+  if (Number.isFinite(Number(promo.maxUses)) && Number(promo.maxUses) > 0 && Number(promo.usageCount) >= Number(promo.maxUses)) {
+    return 0;
+  }
+
   const value = Number(promo.discountValue);
   if (promo.discountType === "PERCENT") {
     return Math.min(subtotal, (subtotal * value) / 100);
@@ -28,6 +36,14 @@ async function validatePromoCode(req, res) {
       return res.status(404).json({ message: "Promo code is invalid." });
     }
 
+    if (promo.expiresAt && new Date(promo.expiresAt).getTime() < Date.now()) {
+      return res.status(400).json({ message: "Promo code has expired." });
+    }
+
+    if (Number.isFinite(Number(promo.maxUses)) && Number(promo.maxUses) > 0 && Number(promo.usageCount) >= Number(promo.maxUses)) {
+      return res.status(400).json({ message: "Promo usage limit reached." });
+    }
+
     const parsedSubtotal = Math.max(0, Number(subtotal) || 0);
     const discountAmount = computeDiscount(parsedSubtotal, promo);
 
@@ -35,6 +51,9 @@ async function validatePromoCode(req, res) {
       code: promo.code,
       discountType: promo.discountType,
       discountValue: Number(promo.discountValue),
+      maxUses: promo.maxUses,
+      usageCount: Number(promo.usageCount || 0),
+      expiresAt: promo.expiresAt || null,
       discountAmount,
       finalTotal: Math.max(0, parsedSubtotal - discountAmount)
     });
@@ -52,6 +71,9 @@ function serializePromo(promo) {
     discountType: data.discountType,
     discountValue: Number(data.discountValue),
     isActive: Boolean(data.isActive),
+    maxUses: data.maxUses,
+    usageCount: Number(data.usageCount || 0),
+    expiresAt: data.expiresAt || null,
     createdAt: data.created_at || data.createdAt || null
   };
 }
@@ -69,7 +91,7 @@ async function getPromoCodes(_req, res) {
 
 async function createPromoCode(req, res) {
   try {
-    const { code, discountType, discountValue, isActive } = req.body;
+    const { code, discountType, discountValue, isActive, maxUses, expiresAt } = req.body;
     const normalizedCode = String(code || "").trim().toUpperCase();
     const normalizedType = String(discountType || "").trim().toUpperCase();
     const value = Number(discountValue);
@@ -92,11 +114,19 @@ async function createPromoCode(req, res) {
       return res.status(409).json({ message: "Promo code already exists." });
     }
 
+    const expiryDate = expiresAt ? new Date(expiresAt) : null;
+    if (expiresAt && Number.isNaN(expiryDate.getTime())) {
+      return res.status(400).json({ message: "Expiry date is invalid." });
+    }
+
     const promo = await PromoCode.create({
       code: normalizedCode,
       discountType: normalizedType,
       discountValue: value,
-      isActive: typeof isActive === "boolean" ? isActive : true
+      isActive: typeof isActive === "boolean" ? isActive : true,
+      maxUses: Number.isFinite(Number(maxUses)) && Number(maxUses) > 0 ? Math.floor(Number(maxUses)) : null,
+      usageCount: 0,
+      expiresAt: expiryDate
     });
 
     return res.status(201).json(serializePromo(promo));
@@ -135,6 +165,19 @@ async function updatePromoCode(req, res) {
 
     if (req.body.isActive !== undefined) {
       updates.isActive = Boolean(req.body.isActive);
+    }
+
+    if (req.body.maxUses !== undefined) {
+      const parsedMaxUses = Number(req.body.maxUses);
+      updates.maxUses = Number.isFinite(parsedMaxUses) && parsedMaxUses > 0 ? Math.floor(parsedMaxUses) : null;
+    }
+
+    if (req.body.expiresAt !== undefined) {
+      const nextExpiry = req.body.expiresAt ? new Date(req.body.expiresAt) : null;
+      if (req.body.expiresAt && Number.isNaN(nextExpiry.getTime())) {
+        return res.status(400).json({ message: "Expiry date is invalid." });
+      }
+      updates.expiresAt = nextExpiry;
     }
 
     await promo.update(updates);

@@ -213,6 +213,18 @@
           </form>
         </section>
 
+        <section class="panel rounded-3xl p-6 shadow-luxe">
+          <div class="mb-4">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Security</p>
+            <h2 class="font-display mt-1 text-2xl font-black text-white">Change Admin Password</h2>
+          </div>
+          <form id="change-password-form" class="grid gap-3 md:grid-cols-3">
+            <input id="current-password" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="password" placeholder="Current password" required />
+            <input id="new-password" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="password" placeholder="New password (min 6)" required />
+            <button class="rounded-xl bg-gold px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110" type="submit">Update Password</button>
+          </form>
+        </section>
+
         <div class="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
           <section class="panel rounded-3xl p-6 shadow-luxe">
             <div class="mb-4">
@@ -223,6 +235,7 @@
               <input name="productId" type="hidden" />
               <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="name" name="name" type="text" placeholder="Perfume name" required />
               <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="price" name="price" type="number" min="0" step="0.01" placeholder="Price" required />
+              <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="stock" name="stock" type="number" min="0" step="1" placeholder="Stock quantity" required />
               <input class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="imageUrl" name="imageUrl" type="url" placeholder="Image URL" required />
               <textarea class="min-h-24 w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" id="description" name="description" placeholder="Description" required></textarea>
               <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -251,6 +264,7 @@
                   <tr>
                     <th class="px-4 py-3 font-black">Product</th>
                     <th class="px-4 py-3 font-black">Price</th>
+                    <th class="px-4 py-3 font-black">Stock</th>
                     <th class="px-4 py-3 font-black">Type</th>
                     <th class="px-4 py-3 font-black">Actions</th>
                   </tr>
@@ -266,13 +280,15 @@
             <p class="muted text-xs font-black uppercase tracking-[0.2em]">Promo Management</p>
             <h2 class="font-display mt-1 text-2xl font-black text-white">Discount Codes</h2>
           </div>
-          <form id="promo-form" class="grid gap-3 md:grid-cols-4">
+          <form id="promo-form" class="grid gap-3 md:grid-cols-5">
             <input id="promo-code" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Code (e.g. KETTY10)" required />
             <select id="promo-type" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold">
               <option value="PERCENT">Percent (%)</option>
               <option value="FLAT">Flat (Naira)</option>
             </select>
             <input id="promo-value" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="number" min="0.01" step="0.01" placeholder="Discount value" required />
+            <input id="promo-max-uses" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="number" min="1" step="1" placeholder="Max uses (optional)" />
+            <input id="promo-expires-at" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="datetime-local" />
             <button class="rounded-xl bg-gold px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110" type="submit">Create Promo</button>
           </form>
           <div class="mt-5 overflow-x-auto rounded-2xl border border-white/10">
@@ -283,6 +299,7 @@
                   <th class="px-4 py-3 font-black">Type</th>
                   <th class="px-4 py-3 font-black">Value</th>
                   <th class="px-4 py-3 font-black">Status</th>
+                  <th class="px-4 py-3 font-black">Rules</th>
                   <th class="px-4 py-3 font-black">Actions</th>
                 </tr>
               </thead>
@@ -297,9 +314,21 @@
               <p class="muted text-xs font-black uppercase tracking-[0.2em]">Order Management</p>
               <h2 class="font-display mt-1 text-2xl font-black text-white">Customer Orders</h2>
             </div>
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <input id="order-search-input" type="search" placeholder="Search order ID" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold sm:w-64" />
+            <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <input id="order-search-input" type="search" placeholder="Search order ID / tracking ID" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold sm:w-64" />
+              <select id="order-status-filter" class="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none transition focus:border-gold">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+              <select id="order-payment-filter" class="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none transition focus:border-gold">
+                <option value="">All Payments</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Verified">Verified</option>
+              </select>
               <button id="order-search-reset" class="rounded-xl border border-white/20 px-4 py-2 text-sm font-black text-white transition hover:border-gold hover:text-gold">Reset</button>
+              <button id="order-export-csv" class="rounded-xl bg-gold px-4 py-2 text-sm font-black text-black transition hover:brightness-110">Export CSV</button>
             </div>
           </div>
           <div class="overflow-x-auto rounded-2xl border border-white/10">

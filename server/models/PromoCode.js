@@ -35,6 +35,28 @@ module.exports = (sequelize) => sequelize.define(
       allowNull: false,
       field: "is_active",
       defaultValue: true
+    },
+    maxUses: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "max_uses",
+      validate: {
+        min: 1
+      }
+    },
+    usageCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "usage_count",
+      defaultValue: 0,
+      validate: {
+        min: 0
+      }
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "expires_at"
     }
   },
   {

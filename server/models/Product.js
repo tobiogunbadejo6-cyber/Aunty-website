@@ -46,6 +46,14 @@ module.exports = (sequelize) => sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
+    },
+    stock: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 20,
+      validate: {
+        min: 0
+      }
     }
   },
   {

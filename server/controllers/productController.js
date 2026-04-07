@@ -47,13 +47,15 @@ async function getProductById(req, res) {
 
 async function createProduct(req, res) {
   try {
+    const parsedStock = Number(req.body.stock);
     const product = await Product.create({
       name: req.body.name,
       price: req.body.price,
       imageUrl: req.body.imageUrl,
       description: req.body.description,
       category: req.body.category,
-      featured: Boolean(req.body.featured)
+      featured: Boolean(req.body.featured),
+      stock: Number.isFinite(parsedStock) ? Math.max(0, Math.floor(parsedStock)) : 20
     });
 
     res.status(201).json(serializeProduct(product));
@@ -70,13 +72,15 @@ async function updateProduct(req, res) {
       return res.status(404).json({ message: "Product not found." });
     }
 
+    const parsedStock = Number(req.body.stock);
     await product.update({
       name: req.body.name,
       price: req.body.price,
       imageUrl: req.body.imageUrl,
       description: req.body.description,
       category: req.body.category,
-      featured: Boolean(req.body.featured)
+      featured: Boolean(req.body.featured),
+      stock: Number.isFinite(parsedStock) ? Math.max(0, Math.floor(parsedStock)) : product.stock
     });
 
     return res.json(serializeProduct(product));

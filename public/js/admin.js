@@ -70,6 +70,7 @@ function fillProductForm(product = null) {
   form.elements.imageUrl.value = product?.imageUrl || "";
   form.elements.description.value = product?.description || "";
   form.elements.category.value = product?.category || "Unisex";
+  form.elements.stock.value = Number.isFinite(Number(product?.stock)) ? Number(product.stock) : 20;
   form.elements.featured.checked = Boolean(product?.featured);
 
   document.getElementById("product-form-title").textContent = product ? "Edit Perfume" : "Add Perfume";
@@ -92,6 +93,7 @@ async function loadProductsTable() {
         </div>
       </td>
       <td class="px-4 py-4 text-slate-300">${adminCurrency(product.price)}</td>
+      <td class="px-4 py-4 text-slate-300">${Number(product.stock || 0)}</td>
       <td class="px-4 py-4 text-slate-300">${product.featured ? "Featured" : "Standard"}</td>
       <td class="px-4 py-4">
         <div class="flex gap-2">
@@ -146,7 +148,7 @@ async function loadPromosTable() {
   if (!promos.length) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="5" class="px-4 py-6 text-center text-slate-500">No promo codes created yet.</td>
+        <td colspan="6" class="px-4 py-6 text-center text-slate-500">No promo codes created yet.</td>
       </tr>
     `;
     return;
@@ -159,6 +161,11 @@ async function loadPromosTable() {
       <td class="px-4 py-4 text-slate-300">${promoValueLabel(promo)}</td>
       <td class="px-4 py-4">
         <span class="status-pill ${promo.isActive ? "status-delivered" : "status-pending"}">${promo.isActive ? "Active" : "Inactive"}</span>
+      </td>
+      <td class="px-4 py-4 text-xs text-slate-300">
+        <div>Max uses: ${promo.maxUses || "Unlimited"}</div>
+        <div>Used: ${promo.usageCount || 0}</div>
+        <div>Expiry: ${promo.expiresAt ? new Date(promo.expiresAt).toLocaleString() : "No expiry"}</div>
       </td>
       <td class="px-4 py-4">
         <div class="flex flex-wrap gap-2">
@@ -201,7 +208,20 @@ async function loadPromosTable() {
 
 async function loadOrdersTable() {
   const search = document.getElementById("order-search-input")?.value?.trim();
-  const orders = await API.request(`/orders${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
+  const status = document.getElementById("order-status-filter")?.value?.trim();
+  const paymentStatus = document.getElementById("order-payment-filter")?.value?.trim();
+  const query = new URLSearchParams();
+  if (search) {
+    query.set("search", search);
+  }
+  if (status) {
+    query.set("status", status);
+  }
+  if (paymentStatus) {
+    query.set("paymentStatus", paymentStatus);
+  }
+
+  const orders = await API.request(`/orders${query.toString() ? `?${query.toString()}` : ""}`, {
     headers: adminHeaders()
   });
   const tableBody = document.getElementById("admin-orders-table");
@@ -216,7 +236,10 @@ async function loadOrdersTable() {
 
   tableBody.innerHTML = orders.map((order) => `
     <tr class="border-b border-white/5 align-top">
-      <td class="px-4 py-4 text-slate-300">#${order._id}</td>
+      <td class="px-4 py-4 text-slate-300">
+        <div>#${order._id}</div>
+        <div class="text-xs text-slate-500">${order.trackingId || "-"}</div>
+      </td>
       <td class="px-4 py-4">
         <p class="font-medium text-white">${order.customerName}</p>
         <p class="mt-1 text-sm text-slate-400">${order.phone}</p>
@@ -389,6 +412,7 @@ function setupProductForm() {
     const payload = {
       name: formData.get("name"),
       price: normalizedPrice,
+      stock: Math.max(0, Math.floor(Number(formData.get("stock")) || 0)),
       imageUrl: formData.get("imageUrl"),
       description: formData.get("description"),
       category: formData.get("category"),
@@ -463,6 +487,35 @@ function setupPaymentSettingsForm() {
   });
 }
 
+function setupChangePasswordForm() {
+  const form = document.getElementById("change-password-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+
+    try {
+      await API.request("/auth/change-password", {
+        method: "PATCH",
+        headers: adminHeaders(),
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      });
+
+      form.reset();
+      window.alert("Admin password updated successfully.");
+    } catch (error) {
+      window.alert(error.message || "Failed to update password.");
+    }
+  });
+}
+
 function setupPromoForm() {
   const form = document.getElementById("promo-form");
   if (!form) {
@@ -474,6 +527,8 @@ function setupPromoForm() {
     const code = document.getElementById("promo-code").value.trim().toUpperCase();
     const discountType = document.getElementById("promo-type").value;
     const discountValue = Number(document.getElementById("promo-value").value);
+    const maxUsesRaw = document.getElementById("promo-max-uses").value;
+    const expiresAtRaw = document.getElementById("promo-expires-at").value;
 
     if (!code) {
       window.alert("Promo code is required.");
@@ -490,25 +545,34 @@ function setupPromoForm() {
       return;
     }
 
-    await API.request("/promos", {
-      method: "POST",
-      headers: adminHeaders(),
-      body: JSON.stringify({
-        code,
-        discountType,
-        discountValue
-      })
-    });
+    try {
+      await API.request("/promos", {
+        method: "POST",
+        headers: adminHeaders(),
+        body: JSON.stringify({
+          code,
+          discountType,
+          discountValue,
+          maxUses: maxUsesRaw ? Number(maxUsesRaw) : null,
+          expiresAt: expiresAtRaw || null
+        })
+      });
 
-    form.reset();
-    document.getElementById("promo-type").value = "PERCENT";
-    await loadPromosTable();
+      form.reset();
+      document.getElementById("promo-type").value = "PERCENT";
+      await loadPromosTable();
+    } catch (error) {
+      window.alert(error.message || "Failed to create promo code.");
+    }
   });
 }
 
 function setupOrderSearch() {
   const searchInput = document.getElementById("order-search-input");
+  const statusFilter = document.getElementById("order-status-filter");
+  const paymentFilter = document.getElementById("order-payment-filter");
   const resetButton = document.getElementById("order-search-reset");
+  const exportButton = document.getElementById("order-export-csv");
 
   if (!searchInput || !resetButton) {
     return;
@@ -518,9 +582,58 @@ function setupOrderSearch() {
     await loadOrdersTable();
   });
 
+  statusFilter?.addEventListener("change", async () => {
+    await loadOrdersTable();
+  });
+
+  paymentFilter?.addEventListener("change", async () => {
+    await loadOrdersTable();
+  });
+
   resetButton.addEventListener("click", async () => {
     searchInput.value = "";
+    if (statusFilter) {
+      statusFilter.value = "";
+    }
+    if (paymentFilter) {
+      paymentFilter.value = "";
+    }
     await loadOrdersTable();
+  });
+
+  exportButton?.addEventListener("click", () => {
+    const query = new URLSearchParams();
+    if (searchInput.value.trim()) {
+      query.set("search", searchInput.value.trim());
+    }
+    if (statusFilter?.value) {
+      query.set("status", statusFilter.value);
+    }
+    if (paymentFilter?.value) {
+      query.set("paymentStatus", paymentFilter.value);
+    }
+
+    const token = getToken();
+    const url = `/api/orders/export.csv${query.toString() ? `?${query.toString()}` : ""}`;
+
+    fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to export CSV.");
+        }
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `kettyscent-orders-${Date.now()}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => window.alert(error.message));
   });
 }
 
@@ -539,6 +652,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupOrderSearch();
   setupAlerts();
   setupPaymentSettingsForm();
+  setupChangePasswordForm();
   setupPromoForm();
 
   const loggedIn = Boolean(getToken());

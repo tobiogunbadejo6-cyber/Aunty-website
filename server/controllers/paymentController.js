@@ -14,6 +14,14 @@ function serializePaymentSetting(setting) {
     instructions: row.instructions,
     freeDeliveryThreshold: Math.max(0, Number(process.env.FREE_DELIVERY_THRESHOLD || 50000)),
     deliveryFee: Math.max(0, Number(process.env.DELIVERY_FEE || 2500)),
+    deliveryZones: (() => {
+      try {
+        const parsed = JSON.parse(process.env.DELIVERY_ZONES_JSON || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        return [];
+      }
+    })(),
     acceptBankTransfer: true,
     acceptCard: false,
     acceptUssd: false

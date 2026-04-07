@@ -10,6 +10,7 @@ function serializeProduct(product) {
     description: data.description,
     category: data.category,
     featured: Boolean(data.featured),
+    stock: Number(data.stock ?? 0),
     createdAt: data.created_at || data.createdAt || null
   };
 }
@@ -47,6 +48,8 @@ function serializeOrder(order, extras = {}) {
     paymentMethod: data.paymentMethod || null,
     paymentReference: data.paymentReference || null,
     paymentStatus: data.paymentStatus || "Pending",
+    trackingId: data.trackingId || null,
+    deliveryZone: data.deliveryZone || null,
     status: data.status,
     createdAt: data.created_at || data.createdAt || null,
     items: Array.isArray(data.items) ? data.items.map(serializeOrderItem) : [],

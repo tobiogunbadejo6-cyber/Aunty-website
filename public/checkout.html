@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout | KETTYSCENT</title>
+    <meta name="description" content="Complete your KETTYSCENT checkout and choose your delivery zone." />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
@@ -15,6 +16,7 @@
         <a href="/" class="text-xl font-semibold uppercase tracking-[0.35em] text-gold">KETTYSCENT</a>
         <div class="flex items-center gap-4">
           <a href="mailto:kettyscent@gmail.com" class="hidden text-sm text-white/75 transition hover:text-gold md:block">Gmail</a>
+          <a href="/track.html" class="hidden text-sm text-white/75 transition hover:text-gold md:block">Track Order</a>
           <a href="/" class="text-sm text-white/75 transition hover:text-gold">Continue Shopping</a>
         </div>
       </nav>
@@ -50,6 +52,12 @@
             <div>
               <label class="mb-2 block text-sm text-white/70" for="address">Address</label>
               <textarea class="form-textarea min-h-36" id="address" name="address" placeholder="Enter delivery address" required></textarea>
+            </div>
+            <div>
+              <label class="mb-2 block text-sm text-white/70" for="deliveryZone">Delivery Zone</label>
+              <select class="form-select" id="deliveryZone" name="deliveryZone">
+                <option value="">Standard Zone</option>
+              </select>
             </div>
             <div class="rounded-[1.25rem] border border-white/10 bg-black/20 p-5">
               <div class="mb-4 flex flex-col gap-3 sm:flex-row">
