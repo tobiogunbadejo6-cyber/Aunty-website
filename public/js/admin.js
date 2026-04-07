@@ -126,6 +126,79 @@ async function loadProductsTable() {
   });
 }
 
+function promoValueLabel(promo) {
+  if (promo.discountType === "PERCENT") {
+    return `${Number(promo.discountValue)}%`;
+  }
+  return adminCurrency(promo.discountValue);
+}
+
+async function loadPromosTable() {
+  const tableBody = document.getElementById("admin-promos-table");
+  if (!tableBody) {
+    return;
+  }
+
+  const promos = await API.request("/promos", {
+    headers: adminHeaders()
+  });
+
+  if (!promos.length) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="px-4 py-6 text-center text-slate-500">No promo codes created yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = promos.map((promo) => `
+    <tr class="border-b border-white/5">
+      <td class="px-4 py-4 font-black text-gold">${promo.code}</td>
+      <td class="px-4 py-4 text-slate-300">${promo.discountType}</td>
+      <td class="px-4 py-4 text-slate-300">${promoValueLabel(promo)}</td>
+      <td class="px-4 py-4">
+        <span class="status-pill ${promo.isActive ? "status-delivered" : "status-pending"}">${promo.isActive ? "Active" : "Inactive"}</span>
+      </td>
+      <td class="px-4 py-4">
+        <div class="flex flex-wrap gap-2">
+          <button data-toggle-promo="${promo._id}" data-promo-active="${promo.isActive}" class="rounded-full border border-white/20 px-4 py-2 text-sm text-white transition hover:border-amber-400 hover:text-amber-300">
+            ${promo.isActive ? "Deactivate" : "Activate"}
+          </button>
+          <button data-delete-promo="${promo._id}" class="rounded-full border border-red-500/40 px-4 py-2 text-sm text-red-300 transition hover:bg-red-500/10">
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("[data-toggle-promo]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const current = button.dataset.promoActive === "true";
+      await API.request(`/promos/${button.dataset.togglePromo}`, {
+        method: "PUT",
+        headers: adminHeaders(),
+        body: JSON.stringify({ isActive: !current })
+      });
+      await loadPromosTable();
+    });
+  });
+
+  document.querySelectorAll("[data-delete-promo]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      if (!window.confirm("Delete this promo code?")) {
+        return;
+      }
+      await API.request(`/promos/${button.dataset.deletePromo}`, {
+        method: "DELETE",
+        headers: adminHeaders()
+      });
+      await loadPromosTable();
+    });
+  });
+}
+
 async function loadOrdersTable() {
   const search = document.getElementById("order-search-input")?.value?.trim();
   const orders = await API.request(`/orders${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
@@ -214,7 +287,7 @@ async function loadOrdersTable() {
 }
 
 async function refreshAdminData() {
-  await Promise.all([loadOverview(), loadProductsTable(), loadOrdersTable(), loadPaymentSettings()]);
+  await Promise.all([loadOverview(), loadProductsTable(), loadPromosTable(), loadOrdersTable(), loadPaymentSettings()]);
 }
 
 function updateLastSeenOrder(order) {
@@ -390,6 +463,49 @@ function setupPaymentSettingsForm() {
   });
 }
 
+function setupPromoForm() {
+  const form = document.getElementById("promo-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const code = document.getElementById("promo-code").value.trim().toUpperCase();
+    const discountType = document.getElementById("promo-type").value;
+    const discountValue = Number(document.getElementById("promo-value").value);
+
+    if (!code) {
+      window.alert("Promo code is required.");
+      return;
+    }
+
+    if (!Number.isFinite(discountValue) || discountValue <= 0) {
+      window.alert("Promo value must be greater than 0.");
+      return;
+    }
+
+    if (discountType === "PERCENT" && discountValue > 100) {
+      window.alert("Percent promo cannot be above 100.");
+      return;
+    }
+
+    await API.request("/promos", {
+      method: "POST",
+      headers: adminHeaders(),
+      body: JSON.stringify({
+        code,
+        discountType,
+        discountValue
+      })
+    });
+
+    form.reset();
+    document.getElementById("promo-type").value = "PERCENT";
+    await loadPromosTable();
+  });
+}
+
 function setupOrderSearch() {
   const searchInput = document.getElementById("order-search-input");
   const resetButton = document.getElementById("order-search-reset");
@@ -423,6 +539,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupOrderSearch();
   setupAlerts();
   setupPaymentSettingsForm();
+  setupPromoForm();
 
   const loggedIn = Boolean(getToken());
   toggleAdminViews(loggedIn);

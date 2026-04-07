@@ -196,6 +196,36 @@
         </div>
 
         <section class="panel rounded-3xl p-6 shadow-luxe">
+          <div class="mb-4">
+            <p class="muted text-xs font-black uppercase tracking-[0.2em]">Promo Management</p>
+            <h2 class="font-display mt-1 text-2xl font-black text-white">Discount Codes</h2>
+          </div>
+          <form id="promo-form" class="grid gap-3 md:grid-cols-4">
+            <input id="promo-code" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Code (e.g. KETTY10)" required />
+            <select id="promo-type" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold">
+              <option value="PERCENT">Percent (%)</option>
+              <option value="FLAT">Flat (Naira)</option>
+            </select>
+            <input id="promo-value" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="number" min="0.01" step="0.01" placeholder="Discount value" required />
+            <button class="rounded-xl bg-gold px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-black transition hover:brightness-110" type="submit">Create Promo</button>
+          </form>
+          <div class="mt-5 overflow-x-auto rounded-2xl border border-white/10">
+            <table class="min-w-full text-left text-sm">
+              <thead class="table-head text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 font-black">Code</th>
+                  <th class="px-4 py-3 font-black">Type</th>
+                  <th class="px-4 py-3 font-black">Value</th>
+                  <th class="px-4 py-3 font-black">Status</th>
+                  <th class="px-4 py-3 font-black">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-promos-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel rounded-3xl p-6 shadow-luxe">
           <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p class="muted text-xs font-black uppercase tracking-[0.2em]">Order Management</p>

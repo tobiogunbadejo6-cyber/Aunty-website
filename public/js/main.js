@@ -27,8 +27,8 @@ function calculateCheckoutTotals(subtotal, discountAmount = 0) {
 function productCard(product) {
   return `
     <article class="product-card glass-panel gold-border overflow-hidden rounded-[1.5rem] page-fade">
-      <div class="relative h-72 overflow-hidden">
-        <img src="${product.imageUrl}" alt="${product.name}" class="h-full w-full object-cover transition duration-500 hover:scale-105" />
+      <div class="relative aspect-[4/5] overflow-hidden bg-black/25 md:h-72 md:aspect-auto">
+        <img src="${product.imageUrl}" alt="${product.name}" class="h-full w-full object-contain p-3 transition duration-500 hover:scale-105 md:object-cover md:p-0" />
         <span class="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs uppercase tracking-[0.3em] text-gold">${product.category}</span>
       </div>
       <div class="space-y-4 p-6">
@@ -128,8 +128,8 @@ async function loadProductPage() {
     const product = await API.request(`/products/${productId}`);
     shell.innerHTML = `
       <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="overflow-hidden rounded-[2rem] gold-border shadow-gold">
-          <img src="${product.imageUrl}" alt="${product.name}" class="h-full w-full object-cover" />
+        <div class="overflow-hidden rounded-[2rem] gold-border bg-black/25 shadow-gold">
+          <img src="${product.imageUrl}" alt="${product.name}" class="h-full max-h-[26rem] w-full object-contain p-4 md:max-h-none md:object-cover md:p-0" />
         </div>
         <div class="space-y-6">
           <span class="inline-flex rounded-full border border-[var(--luxury-gold)] px-4 py-2 text-xs uppercase tracking-[0.35em] text-gold">${product.category}</span>
@@ -245,7 +245,7 @@ function renderCartItems() {
 
   cartContainer.innerHTML = cart.map((item) => `
     <div class="flex flex-col gap-4 rounded-[1.25rem] border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center">
-      <img src="${item.imageUrl}" alt="${item.name}" class="h-24 w-full rounded-2xl object-cover sm:w-24" />
+      <img src="${item.imageUrl}" alt="${item.name}" class="h-24 w-full rounded-2xl bg-black/20 object-contain p-2 sm:w-24 sm:object-cover sm:p-0" />
       <div class="flex-1">
         <h3 class="text-lg font-medium text-white">${item.name}</h3>
         <p class="mt-1 text-sm text-gold">${currency(item.price)}</p>
