@@ -46,6 +46,30 @@
         background: rgba(255, 255, 255, 0.05);
       }
 
+      @media (min-width: 1024px) {
+        .promo-inline {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr 1fr 1fr 1.2fr 0.9fr;
+          align-items: end;
+        }
+
+        .orders-inline {
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .orders-inline #order-search-input {
+          width: 18rem;
+        }
+
+        .overflow-x-auto table th,
+        .overflow-x-auto table td {
+          white-space: nowrap;
+        }
+      }
+
       @media (max-width: 1024px) {
         header nav {
           padding: 0.75rem 1rem;
@@ -102,8 +126,46 @@
         }
 
         #admin-dashboard-view .overflow-x-auto table {
-          min-width: 760px;
+          min-width: 100%;
           font-size: 0.75rem !important;
+        }
+
+        #admin-dashboard-view .overflow-x-auto table th,
+        #admin-dashboard-view .overflow-x-auto table td {
+          white-space: normal !important;
+        }
+
+        .promo-inline,
+        .orders-inline {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 0.6rem !important;
+        }
+
+        .promo-inline > *,
+        .orders-inline > * {
+          width: 100% !important;
+        }
+
+        .orders-inline #order-search-input {
+          width: 100% !important;
+        }
+
+        .orders-inline button,
+        .promo-inline button {
+          width: 100%;
+        }
+
+        table:has(#admin-orders-table) thead th:nth-child(3),
+        table:has(#admin-orders-table) thead th:nth-child(4),
+        #admin-orders-table td:nth-child(3),
+        #admin-orders-table td:nth-child(4) {
+          display: none;
+        }
+
+        table:has(#admin-promos-table) thead th:nth-child(5),
+        #admin-promos-table td:nth-child(5) {
+          display: none;
         }
 
         #admin-products-table img {
@@ -280,7 +342,7 @@
             <p class="muted text-xs font-black uppercase tracking-[0.2em]">Promo Management</p>
             <h2 class="font-display mt-1 text-2xl font-black text-white">Discount Codes</h2>
           </div>
-          <form id="promo-form" class="grid gap-3 md:grid-cols-5">
+          <form id="promo-form" class="promo-inline grid gap-3 md:grid-cols-3">
             <input id="promo-code" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold" type="text" placeholder="Code (e.g. KETTY10)" required />
             <select id="promo-type" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold">
               <option value="PERCENT">Percent (%)</option>
@@ -314,7 +376,7 @@
               <p class="muted text-xs font-black uppercase tracking-[0.2em]">Order Management</p>
               <h2 class="font-display mt-1 text-2xl font-black text-white">Customer Orders</h2>
             </div>
-            <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div class="orders-inline flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <input id="order-search-input" type="search" placeholder="Search order ID / tracking ID" class="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-white outline-none transition focus:border-gold sm:w-64" />
               <select id="order-status-filter" class="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none transition focus:border-gold">
                 <option value="">All Status</option>
