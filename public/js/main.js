@@ -28,22 +28,22 @@ function productCard(product) {
   const outOfStock = Number(product.stock || 0) <= 0;
   return `
     <article class="product-card glass-panel gold-border overflow-hidden rounded-[1.5rem] page-fade">
-      <div class="relative aspect-[4/5] overflow-hidden bg-black/25 md:h-72 md:aspect-auto">
-        <img src="${product.imageUrl}" alt="${product.name}" class="h-full w-full object-contain p-3 transition duration-500 hover:scale-105 md:object-cover md:p-0" />
+      <div class="relative aspect-[4/5] overflow-hidden bg-black/25 sm:aspect-[3/4] md:h-72 md:aspect-auto">
+        <img src="${product.imageUrl}" alt="${product.name}" class="h-full w-full object-contain p-2 transition duration-500 hover:scale-105 md:object-cover md:p-0" />
         <span class="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs uppercase tracking-[0.3em] text-gold">${product.category}</span>
       </div>
-      <div class="space-y-4 p-6">
+      <div class="space-y-3 p-3 sm:p-4 md:space-y-4 md:p-6">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-xl font-semibold text-white">${product.name}</h3>
-            <p class="mt-2 line-clamp-2 text-sm text-white/70">${product.description}</p>
-            <p class="mt-2 text-xs uppercase tracking-[0.2em] ${outOfStock ? "text-red-300" : "text-emerald-300"}">${outOfStock ? "Out of stock" : `In stock: ${product.stock}`}</p>
+            <h3 class="text-sm font-semibold text-white sm:text-base md:text-xl">${product.name}</h3>
+            <p class="mt-1 line-clamp-2 hidden text-xs text-white/70 sm:block md:mt-2 md:text-sm">${product.description}</p>
+            <p class="mt-1 text-[10px] uppercase tracking-[0.15em] sm:mt-2 sm:text-xs sm:tracking-[0.2em] ${outOfStock ? "text-red-300" : "text-emerald-300"}">${outOfStock ? "Out of stock" : `In stock: ${product.stock}`}</p>
           </div>
-          <span class="whitespace-nowrap text-lg font-semibold text-gold">${currency(product.price)}</span>
+          <span class="whitespace-nowrap text-xs font-semibold text-gold sm:text-sm md:text-lg">${currency(product.price)}</span>
         </div>
-        <div class="flex gap-3">
-          <a href="/product.html?id=${product._id}" class="flex-1 rounded-full border border-white/15 px-4 py-3 text-center text-sm font-medium text-white transition hover:border-[var(--luxury-gold)] hover:text-gold">View Details</a>
-          <button data-add-to-cart="${product._id}" ${outOfStock ? "disabled" : ""} class="flex-1 rounded-full px-4 py-3 text-sm font-semibold transition ${outOfStock ? "cursor-not-allowed bg-white/20 text-white/60" : "bg-gold text-black hover:brightness-110"}">Add to Cart</button>
+        <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+          <a href="/product.html?id=${product._id}" class="flex-1 rounded-full border border-white/15 px-3 py-2 text-center text-[11px] font-medium text-white transition hover:border-[var(--luxury-gold)] hover:text-gold sm:px-4 sm:py-3 sm:text-sm">View Details</a>
+          <button data-add-to-cart="${product._id}" ${outOfStock ? "disabled" : ""} class="flex-1 rounded-full px-3 py-2 text-[11px] font-semibold transition sm:px-4 sm:py-3 sm:text-sm ${outOfStock ? "cursor-not-allowed bg-white/20 text-white/60" : "bg-gold text-black hover:brightness-110"}">Add to Cart</button>
         </div>
       </div>
     </article>
